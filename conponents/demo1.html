@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Components_test</title>
+    <script src="../vue.js"></script>
+</head>
+<body>
+    <div id="example">
+        <my-component></my-component>
+        <br>
+        <my-component1></my-component1>
+        <!-- html结构限制的处理写法 -->
+        <table>
+            <tr is="my-component2"><tr>
+            <!-- 应当注意，如果使用来自以下来源之一的字符串模板，则没有这些限制：
+                <script type="text/x-template">
+                JavaScript 内联模板字符串
+                .vue 组件 
+            -->
+        </table>
+    </div>
+    
+    
+    <script>
+        // Make sure the component is registered 
+        // before you instantiate the root Vue instance. 
+        // 全局注册组件
+        Vue.component('my-component', {
+            template:'<div>doudoumao 全局组件</div>'
+        })
+         // 局部作用域注册组件
+         var Child0 = {
+            template:'<div>豆豆猫局部组件0</div>'
+        }
+         var Child1 = {
+            template:'<div>豆豆猫局部组件1-突破html结构限制</div>'
+        }
+        new Vue({
+            el:'#example',
+            components:{
+                'my-component1':Child0,
+                'my-component2':Child1
+            }
+        })
+       
+    </script>
+    <!-- data必须是函数 -->
+    <div id="example-2">
+        <simple-counter></simple-counter>
+        <simple-counter></simple-counter>
+        <simple-counter></simple-counter>
+    </div>
+    <script>
+        // Vue.component('my-component3',{
+        //     template:'<span>{{message}}</span>>',
+        //     data:{
+        //         message:'hello'
+        //     }
+        // })
+        // 以上写法会直接报错
+        var data = {counter:0}
+        Vue.component('simple-counter',{
+            template:'<button v-on:click="counter += 1">{{counter}}</button>',
+            // data:function(){
+            //     return data
+            // }
+            //以上模仿的是强耦合写法 要用的时候也能这么用
+            data:function(){
+                return{
+                    counter:0
+                }
+            }
+            //以上是标准解耦写法
+        })
+        new Vue({
+            el:'#example-2'
+        })
+    </script>
+
+    <!-- 组件传参测试 -->
+    <div id="example-3">
+        <!-- 直接绑（静态） -->
+        1.<child my-message="hello!豆豆猫的"></child>
+        <!-- 属性绑（动态） -->
+        <!-- <input v-model="parentMsg"> -->
+        <br>
+        2.<child v-bind:my-message="parentMsg"></child>
+        <!-- 直接传对象 -->
+        <br>
+        3.<child v-bind:text="obj.text"></child>
+        <!-- <child v-bind:text="parentMsg"></child> -->
+        <br>
+        <!-- <child v-bind:"obj"></child> -->
+        <!-- <child v-bind:obj></child> -->
+        <!-- 上面这种写法不行 -->
+        4.<child v-bind=obj></child>
+
+    </div>
+    <script>
+        // 组件传参
+        Vue.component('child', {
+            // 在 JavaScript 中使用 camelCase
+            //父子组件传参测试
+            props: ['myMessage','text','boolean'],
+            template: '<span>{{ myMessage }}{{text}}{{boolean}}</span>'
+        })
+        new Vue({
+            el:'#example-3',
+            // 经测试桥变量parentMsg必须初始化（在属性绑情况下 直接绑则不用）
+            //也即是说v-model底层不会生成变量 而直接写自定义属性会
+            //另外属性绑v-bind:a="X" 传的X是对象（保留数据类型）而不是字符串 但直接绑传的是字符串
+            data:{
+                parentMsg:"doudoumao",
+                obj:{
+                    text:"learn vue",
+                    boolean:true
+                }
+            }
+        })
+        // camelCase vs. kebab-case
+        // 在html中驼峰命名的prop需转换为对应了kebab-case
+    </script>
+
+    <!-- 子组件加工prop数据 -->
+    <div id="example-4">
+
+    </div>
+    <script>
+        //Prop的机制是单向绑定 之所以不是双向绑 是为了让数据流变得清晰可以理解
+        //不应该在子组件内改变prop否则Vue会发警告
+        // 在两种情况下，我们很容易忍不住想去修改 prop 中数据：
+        //     1.Prop 作为初始值传入后，子组件想把它当作局部数据来用；
+        //     2.Prop 作为原始数据传入，由子组件处理成其它数据输出。
+        new Vue({
+            el:"#example-4",
+            props:['initialCounter'],
+            data:function(){
+                return{counter:this.initialCounter}
+            }
+        })
+    </script>
+</body>
+</html>
