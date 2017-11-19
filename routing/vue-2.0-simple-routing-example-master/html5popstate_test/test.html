@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>图解用HTML5的popstate如何玩转浏览器历史记录</title>
+</head>
+<body>
+<span class="js-news">新闻</span>
+<span class="js-music">音乐</span>
+<script>
+    // history.pushState(data,title,url);
+    // history.replaceState("首页","",location.href+ "#news");
+    // 其中第一个参数data是给state的值；第二个参数title为页面的标题，
+    // 但当前所有浏览器都忽略这个参数，传个空字符串就好；第三个参数url是你想要去的链接；
+    // 两者区别：pushState会改变history.length，而replaceState不改变history.length
+    var locationHref = location.href;
+    document.addEventListener("click", function (event) {
+        var target = event.target;
+        console.log("click:" + target.className+";"+locationHref+history.length);
+        if (target.className == "js-news") {
+            history.pushState("首页", "", locationHref + "#news");
+        } else if (target.className == "js-music") {
+            history.pushState("音乐", "", locationHref + "#music");
+        }
+    });
+    /*    document.addEventListener("click",function(event){
+     var target = event.target;
+     if(target.className == "js-news"){
+     history.replaceState("首页","",locationHref + "#news");
+     }else if(target.className == "js-music"){
+     history.replaceState("音乐","",locationHref + "#music");
+     }
+     });*/
+    window.addEventListener("popstate", function () {
+        console.log(history.state);
+    })
+    // 需要注意的是调用history.pushState()或history.replaceState()不会触发popstate事件。
+    // 只有在做出浏览器动作时，才会触发该事件，
+    // 如用户点击浏览器的回退按钮（或者在Javascript代码中调用history.back()）
+    // window.onpopstate=function(){}
+    // HTML5之pushstate、popstate操作history，无刷新改变当前url
+</script>
+</body>
+</html>
